@@ -14,7 +14,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TimePicker;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -24,12 +26,15 @@ public class CrimeFragment extends Fragment {
 
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "DialogDate";
+    private static final String DIALOG_TIME = "DialogTime";
 
     private static final int REQUEST_DATE = 0;
+    private static final int REQUEST_TIME = 1;
 
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
+    private Button mTimeButton;
     private CheckBox mSolvedCheckbox;
 
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -85,6 +90,18 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mTimeButton = (Button) v.findViewById(R.id.crime_time);
+        updateTime();
+        mTimeButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager manager = getFragmentManager();
+                TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
+                dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+                dialog.show(manager, DIALOG_TIME);
+            }
+        });
+
         mSolvedCheckbox = (CheckBox) v.findViewById(R.id.crime_solved);
         mSolvedCheckbox.setChecked(mCrime.isSolved());
         mSolvedCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -109,10 +126,26 @@ public class CrimeFragment extends Fragment {
                     .getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
             updateDate();
+        } else if (requestCode == REQUEST_TIME) {
+            int hour = (int) data.getSerializableExtra(TimePickerFragment.EXTRA_HOUR);
+            int minute = (int) data.getSerializableExtra(TimePickerFragment.EXTRA_MINUTE);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(mCrime.getDate());
+            calendar.set(Calendar.HOUR_OF_DAY, hour);
+            calendar.set(Calendar.MINUTE, minute);
+            mCrime.setDate(calendar.getTime());
+            updateDate();
+            updateTime();
         }
     }
 
     private void updateDate() {
         mDateButton.setText(mCrime.getDate().toString());
+    }
+
+    private void updateTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(mCrime.getDate());
+        mTimeButton.setText(calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE));
     }
 }
