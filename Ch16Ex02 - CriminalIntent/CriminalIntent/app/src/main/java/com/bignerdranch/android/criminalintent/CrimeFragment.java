@@ -16,9 +16,11 @@ import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -41,6 +43,7 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
     private static final int REQUEST_PHOTO = 2;
+    private static final String TAG = "CrimeFragment";
 
     private Crime mCrime;
     private File mPhotoFile;
@@ -111,7 +114,7 @@ public class CrimeFragment extends Fragment {
         mSolvedCheckbox.setChecked(mCrime.isSolved());
         mSolvedCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, 
+            public void onCheckedChanged(CompoundButton buttonView,
                     boolean isChecked) {
                 mCrime.setSolved(isChecked);
             }
@@ -176,7 +179,14 @@ public class CrimeFragment extends Fragment {
         });
 
         mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
-        updatePhotoView();
+        ViewTreeObserver observer = mPhotoView.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Log.d(TAG, "onGlobalLayout");
+                updatePhotoView();
+            }
+        });
 
         return v;
     }
@@ -265,8 +275,10 @@ public class CrimeFragment extends Fragment {
         if (mPhotoFile == null || !mPhotoFile.exists()) {
             mPhotoView.setImageDrawable(null);
         } else {
+            Log.d(TAG, "imageWidth: " + mPhotoView.getWidth());
+            Log.d(TAG, "imageHeight: " + mPhotoView.getHeight());
             Bitmap bitmap = PictureUtils.getScaledBitmap(
-                    mPhotoFile.getPath(), getActivity());
+                    mPhotoFile.getPath(), mPhotoView.getWidth(), mPhotoView.getHeight());
             mPhotoView.setImageBitmap(bitmap);
         }
     }
