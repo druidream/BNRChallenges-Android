@@ -177,6 +177,14 @@ public class CrimeFragment extends Fragment {
 
         mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
         updatePhotoView();
+        mPhotoView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), ImageDialogActivity.class);
+                i.putExtra("photoFile", mPhotoFile);
+                startActivity(i);
+            }
+        });
 
         return v;
     }
