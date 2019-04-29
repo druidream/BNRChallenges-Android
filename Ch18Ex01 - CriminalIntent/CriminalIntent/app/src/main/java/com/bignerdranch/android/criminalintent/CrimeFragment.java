@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import static android.widget.CompoundButton.OnCheckedChangeListener;
@@ -269,7 +270,9 @@ public class CrimeFragment extends Fragment {
     }
 
     private void updateDate() {
-        mDateButton.setText(mCrime.getDate().toString());
+        Locale locale = getResources().getConfiguration().locale;
+        String bestDateFormat = DateFormat.getBestDateTimePattern(locale, "yyyyMMdd");
+        mDateButton.setText(DateFormat.format(bestDateFormat, mCrime.getDate()));
     }
 
     private String getCrimeReport() {
